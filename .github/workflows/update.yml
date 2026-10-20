@@ -67,12 +67,13 @@ jobs:
       # scheduled run continues from the saved cache.
       - name: Scan plugins and rate compatibility
         env:
-          NODE_OPTIONS: "--max-old-space-size=6144 --optimize-for-size --max-semi-space-size=128"
+          NODE_OPTIONS: "--max-old-space-size=6144" # Оставляем только этот чистый флаг памяти
         run: >
           node scripts/generate.mjs
           --budget-minutes 320
-          --concurrency 6
+          --concurrency 2
           ${{ inputs.force && '--force' || '' }}
+
 
       # always(): a partial result (budget reached, a flaky network) is still progress worth keeping.
       - name: Commit changes
