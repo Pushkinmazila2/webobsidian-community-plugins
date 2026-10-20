@@ -39,11 +39,11 @@ export async function scanPlugin(repo, { getText, index }) {
   const head = await getText(`https://raw.githubusercontent.com/${repo}/HEAD/manifest.json`, { maxBytes: 1_000_000 });
   const headManifest = head.status === 200 ? parseObject(head.text) : null;
   const bases = [];
-  if (typeof headManifest?.version === 'string' && /^[\w.+-]{1,64}$/.test(headManifest.version)) bases.push(`https://github.com/${repo}/releases/download/${headManifest.version}`);
+  if (typeof headManifest?.version === 'string' && /^[\w.+-]{1,64}\$/.test(headManifest.version)) bases.push(`https://github.com/${repo}/releases/download/${headManifest.version}`);
   bases.push(`https://github.com/${repo}/releases/latest/download`);
 
   for (const base of bases) {
-    const js = await getText(`${base}/main.js`, { maxBytes: 60 * 1048576 });
+    let js = await getText(`${base}/main.js`, { maxBytes: 60 * 1048576 });
     if (js.status === 404) continue;
     // the release's own manifest.json is what gets installed; the root one stands in if the release lacks it
     const m = await getText(`${base}/manifest.json`, { maxBytes: 1_000_000 });
@@ -51,10 +51,16 @@ export async function scanPlugin(repo, { getText, index }) {
     if (!manifest) return { state: m.status === 404 ? 'norelease' : 'badmanifest' };
     if (js.status === 413) return { state: 'toolarge', ...manifestFields(manifest) };
     if (js.status !== 200) return { state: 'nomain', ...manifestFields(manifest) };
-    return { state: 'ok', ...manifestFields(manifest), usage: extractUsage(js.text, index) };
+    
+    // Извлекаем использование API и сразу же полностью освобождаем память от тяжелого кода js.text
+    const usage = extractUsage(js.text, index);
+    js = null; 
+
+    return { state: 'ok', ...manifestFields(manifest), usage };
   }
   return { state: 'norelease' };
 }
+
 
 function manifestFields(m) {
   return {
@@ -154,7 +160,16 @@ export async function run(o, deps = {}) {
 
   // ---- scan ----
   let scanned = 0, failed = 0, sinceCheckpoint = 0;
-  const checkpoint = () => { cache.updatedAt = new Date(now()).toISOString(); writeAtomic(o.cacheFile, JSON.stringify(cache)); sinceCheckpoint = 0; };
+  const checkpoint = () => { 
+    cache.updatedAt = new Date(now()).toISOString(); 
+    writeAtomic(o.cacheFile, JSON.stringify(cache)); 
+    sinceCheckpoint = 0; 
+    
+    // Принудительный сброс памяти V8 после сохранения кэша на диск
+    if (global.gc) {
+      try { global.gc(); } catch (e) {}
+    }
+  };
   const { skipped } = await pool(queue, o.concurrency ?? 12, async (p) => {
     const st = stats[p.id];
     try {
@@ -170,12 +185,11 @@ export async function run(o, deps = {}) {
       if (old?.state === 'ok') cache.plugins[p.id].retry = true;
     }
     scanned++;
-    if (++sinceCheckpoint >= 500) checkpoint();
+    if (++sinceCheckpoint >= 150) checkpoint(); // Снизили интервал с 500 до 150
     if (scanned % 250 === 0) log(`  scanned ${scanned}/${queue.length}…`);
   }, { deadline: o.budgetMs ? started + o.budgetMs : Infinity, now });
   // records kept through an error get another look next run
   for (const rec of Object.values(cache.plugins)) if (rec.retry) { rec.scannedAt = new Date(0).toISOString(); delete rec.retry; }
-
   // forget plugins removed from the official list
   const ids = new Set(entries.map((p) => p.id));
   for (const id of Object.keys(cache.plugins)) if (!ids.has(id)) delete cache.plugins[id];
