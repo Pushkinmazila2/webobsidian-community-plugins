@@ -21,6 +21,13 @@ export const SCHEMA = 1;
 export const SCANNER = 2;
 export const COMPAT = ['full', 'partial', 'broken', 'unknown'];
 
+/**
+ * Largest main.js that is downloaded and analysed. Analysis needs roughly 30x the file size in memory (the text,
+ * a noise-stripped copy, a masked copy), and a free GitHub runner has 7 GB: bigger files are bundles with embedded
+ * fonts/wasm/images, and are reported as "too large to analyse" instead of risking the whole run.
+ */
+export const MAX_MAIN_JS = 12 * 1048576;
+
 const DAY = 86_400_000;
 /** Plugins with no release info in the stats file, and states that may heal on their own, are looked at again after this long. */
 const RECHECK_MS = 7 * DAY;
@@ -44,7 +51,7 @@ export async function scanPlugin(repo, { getText, index }) {
 
 
   for (const base of bases) {
-    let js = await getText(`${base}/main.js`, { maxBytes: 60 * 1048576 });
+    let js = await getText(`${base}/main.js`, { maxBytes: MAX_MAIN_JS });
     if (js.status === 404) continue;
     // the release's own manifest.json is what gets installed; the root one stands in if the release lacks it
     const m = await getText(`${base}/manifest.json`, { maxBytes: 1_000_000 });

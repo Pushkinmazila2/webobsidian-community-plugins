@@ -67,10 +67,10 @@ jobs:
       # scheduled run continues from the saved cache.
       - name: Scan plugins and rate compatibility
         run: >
-          node --max-old-space-size=6144 --expose-gc
+          node --max-old-space-size=4096 --expose-gc
           scripts/generate.mjs
           --budget-minutes 320
-          --concurrency 6
+          --concurrency 4
           ${{ inputs.force && '--force' || '' }}
 
 
