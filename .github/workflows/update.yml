@@ -65,14 +65,27 @@ jobs:
 
       # 9 000+ plugins: a first run takes hours. The budget stops cleanly before the job limit and the next
       # scheduled run continues from the saved cache.
-      - name: Scan plugins and rate compatibility
+      - name: Scan plugins (Batch 1)
         env:
-          NODE_OPTIONS: "--max-old-space-size=6144" # Оставляем только этот чистый флаг памяти
-        run: >
-          node scripts/generate.mjs
-          --budget-minutes 320
-          --concurrency 2
-          ${{ inputs.force && '--force' || '' }}
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        # Убираем --force со второго шага, чтобы он не стирал кэш первого!
+        run: node scripts/generate.mjs --budget-minutes 30 --concurrency 4 --limit 2500 --force
+
+      - name: Scan plugins (Batch 2)
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: node scripts/generate.mjs --budget-minutes 30 --concurrency 4 --limit 5000
+
+      - name: Scan plugins (Batch 3)
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: node scripts/generate.mjs --budget-minutes 30 --concurrency 4 --limit 7500
+
+      - name: Scan plugins (Batch 4)
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: node scripts/generate.mjs --budget-minutes 30 --concurrency 4
+
 
 
       # always(): a partial result (budget reached, a flaky network) is still progress worth keeping.
