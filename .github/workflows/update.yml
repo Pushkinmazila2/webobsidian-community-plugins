@@ -77,15 +77,23 @@ jobs:
 
       # always(): a partial result (budget reached, a flaky network) is still progress worth keeping.
       - name: Commit changes
-        if: always()
         run: |
-          git config user.name  "plugin-compat[bot]"
+          git config user.name "plugin-compat[bot]"
           git config user.email "plugin-compat[bot]@users.noreply.github.com"
-          git add capabilities.json community-plugins.json data/usage-cache.json
+          
+          # Добавляем только существующие файлы, чтобы избежать ошибок git pathspec
+          for file in capabilities.json community-plugins.json data/usage-cache.json; do
+            if [ -f "$file" ]; then
+              git add "$file"
+            fi
+          done
+          
+          # Проверяем, есть ли реальные изменения в индексе перед коммитом
           if git diff --cached --quiet; then
-            echo "nothing changed"
+            echo "Никаких изменений не обнаружено, пропускаем коммит."
           else
             git commit -m "Update plugin compatibility ($(date -u +%F))"
             git pull --rebase --autostash
             git push
           fi
+
