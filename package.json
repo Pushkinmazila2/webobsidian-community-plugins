@@ -1,0 +1,13 @@
+{
+  "name": "webobsidian-community-plugins",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Daily compatibility ratings (full / partial / broken) of Obsidian community plugins for WebObsidian",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "capabilities": "node scripts/build-capabilities.mjs --webobsidian ../webobsidian --out capabilities.json",
+    "generate": "node scripts/generate.mjs"
+  }
+}

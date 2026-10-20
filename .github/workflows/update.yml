@@ -1,0 +1,88 @@
+name: Update plugin compatibility
+
+# Once a day: re-read Obsidian's community-plugins.json, rescan plugins whose release changed, rate every plugin
+# against WebObsidian's current capabilities and commit the result.
+#
+# WebObsidian itself only *reads* the published community-plugins.json from this repository (Settings → Community
+# Plugins → Browse); everything that produces it lives here.
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rescan every plugin (ignore the cache)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+# Never two runs at once: they would fight over the cache file.
+concurrency:
+  group: update-compat
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      # Where capabilities come from. Set repository variables to override.
+      WEBOBSIDIAN_REPO: ${{ vars.WEBOBSIDIAN_REPO || 'Pushkinmazila2/webobsidian' }}
+      # the branch whose plugin shim is rated; switch the default to 'main' once the plugin manager is merged there
+      WEBOBSIDIAN_REF: ${{ vars.WEBOBSIDIAN_REF || 'test/github-storage' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.WEBOBSIDIAN_REPO }}
+          ref: ${{ env.WEBOBSIDIAN_REF }}
+          path: webobsidian
+          persist-credentials: false
+
+      - uses: actions/checkout@v4
+        with:
+          repository: obsidianmd/obsidian-api
+          path: obsidian-api
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Tests
+        run: node --test test/*.test.mjs
+
+      - name: Build capabilities.json
+        run: >
+          node scripts/build-capabilities.mjs
+          --webobsidian webobsidian --obsidian-api obsidian-api
+          --repo "$WEBOBSIDIAN_REPO" --ref "$WEBOBSIDIAN_REF"
+          --out capabilities.json
+
+      # 9 000+ plugins: a first run takes hours. The budget stops cleanly before the job limit and the next
+      # scheduled run continues from the saved cache.
+      - name: Scan plugins and rate compatibility
+        run: >
+          node scripts/generate.mjs
+          --budget-minutes 320
+          --concurrency 12
+          ${{ inputs.force && '--force' || '' }}
+
+      # always(): a partial result (budget reached, a flaky network) is still progress worth keeping.
+      - name: Commit changes
+        if: always()
+        run: |
+          git config user.name  "plugin-compat[bot]"
+          git config user.email "plugin-compat[bot]@users.noreply.github.com"
+          git add capabilities.json community-plugins.json data/usage-cache.json
+          if git diff --cached --quiet; then
+            echo "nothing changed"
+          else
+            git commit -m "Update plugin compatibility ($(date -u +%F))"
+            git pull --rebase --autostash
+            git push
+          fi
