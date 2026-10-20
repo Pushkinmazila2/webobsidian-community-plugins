@@ -243,13 +243,16 @@ export function extractUsage(source, index) {
   }
   if (evalHit) signals.push('eval');
 
+  // Regex captures and slices are *views* into the 12 MB source they came from, so keeping one alive keeps the whole
+  // masked copy alive: thousands of plugins in the cache would exhaust the heap. Copy each name into a string of its own.
+  const own = (names) => names.map((n) => Buffer.from(n, 'utf8').toString('utf8'));
   return {
     size: source.length,
-    api: known(api),
-    extends: known(ext),
-    members: [...members].sort(),
-    requires: [...requires].sort(),
-    topRequires: [...topRequires].sort(),
+    api: own(known(api)),
+    extends: own(known(ext)),
+    members: own([...members].sort()),
+    requires: own([...requires].sort()),
+    topRequires: own([...topRequires].sort()),
     signals,
   };
 }
