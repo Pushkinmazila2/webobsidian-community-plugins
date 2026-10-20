@@ -66,6 +66,8 @@ jobs:
       # 9 000+ plugins: a first run takes hours. The budget stops cleanly before the job limit and the next
       # scheduled run continues from the saved cache.
       - name: Scan plugins and rate compatibility
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144 --optimize-for-size --max-semi-space-size=128"
         run: >
           node scripts/generate.mjs
           --budget-minutes 320
