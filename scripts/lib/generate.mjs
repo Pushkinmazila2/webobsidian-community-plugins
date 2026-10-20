@@ -39,7 +39,7 @@ export async function scanPlugin(repo, { getText, index }) {
   const head = await getText(`https://raw.githubusercontent.com/${repo}/HEAD/manifest.json`, { maxBytes: 1_000_000 });
   const headManifest = head.status === 200 ? parseObject(head.text) : null;
   const bases = [];
-  if (typeof headManifest?.version === 'string' && /^[\w.+-]{1,64}\$/.test(headManifest.version)) bases.push(`https://github.com/${repo}/releases/download/${headManifest.version}`);
+  if ( typeof headManifest?. version === 'string' && /^[\w.+-]{ 1, 64}\$/. test( headManifest. version)) bases. push(`https://github.com{ repo}/releases/download/${ headManifest. version}`);
   bases.push(`https://github.com/${repo}/releases/latest/download`);
 
   for (const base of bases) {
