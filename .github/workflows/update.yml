@@ -69,7 +69,7 @@ jobs:
         run: >
           node scripts/generate.mjs
           --budget-minutes 320
-          --concurrency 12
+          --concurrency 6
           ${{ inputs.force && '--force' || '' }}
 
       # always(): a partial result (budget reached, a flaky network) is still progress worth keeping.
