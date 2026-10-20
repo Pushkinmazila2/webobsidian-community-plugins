@@ -47,7 +47,7 @@ export async function scanPlugin(repo, { getText, index }) {
     if (js.status === 404) continue;
     // the release's own manifest.json is what gets installed; the root one stands in if the release lacks it
     const m = await getText(`${base}/manifest.json`, { maxBytes: 1_000_000 });
-    const manifest = (m.status === 200 ? parseObject(m.text) : null) ?? (base === bases ? headManifest : null);
+    const manifest = (m.status === 200 ? parseObject(m.text) : null) ?? (base === bases[0] ? headManifest : null);
     if (!manifest) return { state: m.status === 404 ? 'norelease' : 'badmanifest' };
     if (js.status === 413) return { state: 'toolarge', ...manifestFields(manifest) };
     if (js.status !== 200) return { state: 'nomain', ...manifestFields(manifest) };
