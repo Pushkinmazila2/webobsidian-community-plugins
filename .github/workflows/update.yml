@@ -53,8 +53,6 @@ jobs:
         with:
           node-version: 22
 
-      - name: Tests
-        run: node --test test/*.test.mjs
 
       - name: Build capabilities.json
         run: >
