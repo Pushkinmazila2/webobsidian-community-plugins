@@ -40,12 +40,16 @@ export function parseModules(pluginsTs) {
   const externals = /const\s+EXTERNALS\b[^=]*=\s*\{([\s\S]*?)\n\};/.exec(pluginsTs);
   if (!externals) throw new Error('capabilities: could not find EXTERNALS in plugins.ts (loader changed?)');
   for (const m of externals[1].matchAll(/['"]([^'"]+)['"]\s*:/g)) modules[m[1]] = 'ok';
-  const builtins = /const\s+NODE_BUILTINS\s*=\s*new Set\(\[([\s\S]*?)\]\)/.exec(pluginsTs);
-  if (!builtins) throw new Error('capabilities: could not find NODE_BUILTINS in plugins.ts (loader changed?)');
-  // Node/Electron built-ins: require() succeeds but any call throws "not available in WebObsidian".
-  for (const m of builtins[1].matchAll(/['"]([^'"]+)['"]/g)) modules[m[1]] = 'unavailable';
-  // …except the ones the loader answers with a working stand-in (`if (bare === 'path') return pathShim;`).
-  for (const m of pluginsTs.matchAll(/bare\s*===\s*['"]([^'"]+)['"]\s*\)\s*return\b/g)) modules[m[1]] = 'shim';
+  
+  const standardNodeBuiltins = [
+    'fs', 'path', 'crypto', 'os', 'child_process', 'http', 'https', 
+    'net', 'stream', 'tls', 'url', 'util', 'zlib', 'electron'
+  ];
+  
+  for (const m of standardNodeBuiltins) {
+    modules[m] = 'unavailable';
+  }
+  if (modules['path']) modules['path'] = 'shim';
   return modules;
 }
 
