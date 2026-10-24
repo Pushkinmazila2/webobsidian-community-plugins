@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-23T08:37:53.917Z",
-  "hash": "8aa345d0c075",
+  "generatedAt": "2026-10-24T08:12:43.168Z",
+  "hash": "0ab2f2dd9689",
   "namesHash": "21e0b14c5315",
-  "source": {"repo":"Pushkinmazila2/webobsidian","ref":"test/github-storage","commit":"197adccc50688ccca5fb8d91275134423989b871"},
+  "source": {"repo":"Pushkinmazila2/webobsidian","ref":"test/github-storage","commit":"5bdce690a79a04f6040b2c57368cf80ebf317438"},
   "api": {"declared":"1.12.7","dts":"1.14.4"},
-  "totals": {"ok":660,"partial":4,"noop":3,"missing":24},
+  "totals": {"ok":660,"partial":4,"noop":3,"missing":22},
   "classes": {
     "AbstractInputSuggest": {"present":true,"ok":["getValue","limit","onSelect","selectSuggestion","setValue"],"partial":[],"noop":[],"missing":[]},
     "AbstractTextComponent": {"present":true,"ok":["getValue","inputEl","onChange","onChanged","setDisabled","setPlaceholder","setValue"],"partial":[],"noop":[],"missing":[]},
@@ -18,7 +18,7 @@
     "BasesViewConfig": {"present":true,"ok":["get","getAsPropertyId","getDisplayName","getEvaluatedFormula","getOrder","getSort","name","set"],"partial":[],"noop":[],"missing":[]},
     "BooleanValue": {"present":true,"ok":["static type"],"partial":[],"noop":[],"missing":[]},
     "ButtonComponent": {"present":true,"ok":["buttonEl","onClick","removeCta","removeDestructive","setButtonText","setClass","setCta","setDestructive","setDisabled","setIcon","setTooltip","setWarning"],"partial":[],"noop":[],"missing":[]},
-    "CapacitorAdapter": {"present":false,"ok":["append","appendBinary","copy","exists","getFullPath","getName","getResourcePath","list","mkdir","process","read","readBinary","remove","rename","rmdir","stat","trashLocal","trashSystem","write","writeBinary"],"partial":[],"noop":[],"missing":[]},
+    "CapacitorAdapter": {"present":true,"ok":["append","appendBinary","copy","exists","getFullPath","getName","getResourcePath","list","mkdir","process","read","readBinary","remove","rename","rmdir","stat","trashLocal","trashSystem","write","writeBinary"],"partial":[],"noop":[],"missing":[]},
     "ColorComponent": {"present":true,"ok":["getValue","getValueHsl","getValueRgb","onChange","setDisabled","setValue","setValueHsl","setValueRgb"],"partial":[],"noop":[],"missing":[]},
     "Component": {"present":true,"ok":["addChild","load","onload","onunload","register","registerDomEvent","registerEvent","registerInterval","removeChild","unload"],"partial":[],"noop":[],"missing":[]},
     "ConfirmationButton": {"present":true,"ok":["onClick","setCancel","setInitialFocus","setSecondary"],"partial":[],"noop":[],"missing":[]},
@@ -33,7 +33,7 @@
     "Events": {"present":true,"ok":["off","offref","on","trigger","tryTrigger"],"partial":[],"noop":[],"missing":[]},
     "ExtraButtonComponent": {"present":true,"ok":["extraSettingsEl","onClick","setDisabled","setIcon","setTooltip"],"partial":[],"noop":[],"missing":[]},
     "FileManager": {"present":true,"ok":["generateMarkdownLink","getAvailablePathForAttachment","getNewFileParent","processFrontMatter","promptForDeletion","renameFile","trashFile"],"partial":[],"noop":[],"missing":[]},
-    "FileSystemAdapter": {"present":false,"ok":["append","appendBinary","copy","exists","getBasePath","getFilePath","getFullPath","getName","getResourcePath","list","mkdir","process","read","readBinary","remove","rename","rmdir","stat","trashLocal","trashSystem","write","writeBinary"],"partial":[],"noop":[],"missing":["static mkdir","static readLocalFile"]},
+    "FileSystemAdapter": {"present":true,"ok":["append","appendBinary","copy","exists","getBasePath","getFilePath","getFullPath","getName","getResourcePath","list","mkdir","process","read","readBinary","remove","rename","rmdir","stat","trashLocal","trashSystem","write","writeBinary"],"partial":[],"noop":[],"missing":["static mkdir","static readLocalFile"]},
     "FileValue": {"present":true,"ok":["isTruthy","toString"],"partial":[],"noop":[],"missing":[]},
     "FileView": {"present":true,"ok":["allowNoFile","canAcceptExtension","file","getDisplayText","getState","navigation","onLoadFile","onRename","onUnloadFile","onload","setState"],"partial":[],"noop":[],"missing":[]},
     "FuzzySuggestModal": {"present":true,"ok":["getItemText","getItems","getSuggestions","onChooseItem","onChooseSuggestion","renderSuggestion"],"partial":[],"noop":[],"missing":[]},
@@ -198,8 +198,6 @@
     "zlib": "unavailable"
   },
   "feasibility": {
-    "CapacitorAdapter": "impossible",
-    "FileSystemAdapter": "impossible",
     "FileSystemAdapter.mkdir": "impossible",
     "FileSystemAdapter.readLocalFile": "impossible",
     "MarkdownEditView": "hard",
